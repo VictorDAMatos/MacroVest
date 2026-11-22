@@ -234,6 +234,3 @@ O escopo inicial definiu contratos para propostas e execuções, mas não defini
 - A exportação CSV é feita localmente pelo navegador.
 - A opção de impressão/PDF utiliza a função de impressão do navegador. Selecione **Salvar como PDF** na janela de impressão.
 - A demonstração não deve ser usada para decisões ou operações financeiras reais.
-=======
-# MacroVest
->>>>>>> 3d84ae9e10622933be4b0d10ab47f37849340914
