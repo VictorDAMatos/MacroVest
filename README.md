@@ -3,8 +3,8 @@
 
 Aplicação web demonstrativa de um motor inteligente de gestão e execução simulada de investimentos. O MacroVest cruza um perfil financeiro fictício com indicadores macroeconômicos simulados para apresentar estratégias, demonstrar a distribuição de aportes e permitir acompanhar o processamento de cada simulação.
 
-> **Aviso:** este projeto é exclusivamente um front-end de estudo. Não realiza investimentos, não envia ordens, não se conecta a bancos ou corretoras e não fornece aconselhamento financeiro. Todos os indicadores, valores, perfis e resultados iniciais são fictícios.
-
+> **Todos os indicadores, valores, perfis e resultados iniciais são fictícios.**
+ 
 ## Tecnologias
 
 - **React + TypeScript:** interface componentizada e tipagem estática.
