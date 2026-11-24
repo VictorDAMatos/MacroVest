@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # MacroVest
 
 Aplicação web demonstrativa de um motor inteligente de gestão e execução simulada de investimentos. O MacroVest cruza um perfil financeiro fictício com indicadores macroeconômicos simulados para apresentar estratégias, demonstrar a distribuição de aportes e permitir acompanhar o processamento de cada simulação.
