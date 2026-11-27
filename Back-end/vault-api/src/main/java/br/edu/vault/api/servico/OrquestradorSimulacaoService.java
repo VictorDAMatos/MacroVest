@@ -70,6 +70,7 @@ public class OrquestradorSimulacaoService {
             boolean incluirEventos,
             String idempotencyKey
 
+
     ) {
         long inicioTotalNs = System.nanoTime();
 
@@ -78,7 +79,7 @@ public class OrquestradorSimulacaoService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Perfil não encontrado: " + perfilId));
         PerfilDTO perfilDTO = perfilService.converterParaDTO(perfilEntity);
 
-        // 2. Dispara chamadas paralelas ao vault-dados com CompletableFuture + Timeout
+        /*// 2. Dispara chamadas paralelas ao vault-dados com CompletableFuture + Timeout
         CompletableFuture<InflacaoDTO> futureInflacao = CompletableFuture
                 .supplyAsync(fonteInflacaoHttp::obterDados)
                 .orTimeout(2500, TimeUnit.MILLISECONDS)
@@ -100,7 +101,36 @@ public class OrquestradorSimulacaoService {
         CompletableFuture.allOf(futureInflacao, futureEventos).join();
 
         InflacaoDTO inflacao = futureInflacao.join();
+        List<EventoInesperadoDTO> eventos = futureEventos.join();*/
+        java.util.concurrent.atomic.AtomicBoolean falhaNosDados = new java.util.concurrent.atomic.AtomicBoolean(false);
+
+        // 2. Dispara chamadas paralelas ao vault-dados (protegidas pelo Resilience4j)
+        CompletableFuture<InflacaoDTO> futureInflacao = CompletableFuture
+                .supplyAsync(fonteInflacaoHttp::obterDados)
+                .orTimeout(3500, TimeUnit.MILLISECONDS)
+                .exceptionally(ex -> {
+                    falhaNosDados.set(true);
+                    return new InflacaoDTO("FALLBACK_TIMEOUT_GLOBAL", 0.0040, List.of(), true);
+                });
+
+        CompletableFuture<List<EventoInesperadoDTO>> futureEventos = incluirEventos
+                ? CompletableFuture.supplyAsync(fonteEventosHttp::obterDados)
+                .orTimeout(3500, TimeUnit.MILLISECONDS)
+                .exceptionally(ex -> {
+                    falhaNosDados.set(true);
+                    return List.of();
+
+                })
+                : CompletableFuture.completedFuture(List.of());
+
+        CompletableFuture.allOf(futureInflacao, futureEventos).join();
+
+        InflacaoDTO inflacao = futureInflacao.join();
         List<EventoInesperadoDTO> eventos = futureEventos.join();
+
+        if (inflacao.fallbackAplicado()) {
+            falhaNosDados.set(true);
+        }
 
         // 3. Envia os dados consolidados para o motor matemático (vault-simulador)
         CalculoRequestDTO calculoRequest = new CalculoRequestDTO(
@@ -139,6 +169,7 @@ public class OrquestradorSimulacaoService {
                     .map(this::converterParaDTO)
                     .orElseThrow(() -> ex);
         }
+
     }
 
     private SimulacaoEntity salvarSimulacao(
