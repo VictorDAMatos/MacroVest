@@ -33,6 +33,36 @@ public class OrquestradorSimulacaoService {
     private final ClienteSimulador clienteSimulador;
     private final ObjectMapper objectMapper;
 
+    public SimulacaoResponseDTO buscarPorId(Long simulacaoId) {
+        SimulacaoEntity entity = simulacaoRepository.findById(simulacaoId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Simulação não encontrada com ID: " + simulacaoId));
+
+        return converterParaDTO(entity);
+    }
+
+    public SimulacaoResponseDTO converterParaDTO(SimulacaoEntity entity) {
+        try {
+            List<ResultadoMensalDTO> evolucao = objectMapper.readValue(
+                    entity.getEvolucaoMensalJson(),
+                    new com.fasterxml.jackson.core.type.TypeReference<>() {}
+            );
+
+            return new SimulacaoResponseDTO(
+                    entity.getId(),
+                    entity.getPerfil().getId(),
+                    entity.getPoliticaAplicada(),
+                    entity.getMesesSobrevivencia(),
+                    entity.getDiasAdicionais(),
+                    entity.isHouveTimeoutDados(),
+                    entity.getTempoProcessamentoMs(),
+                    evolucao
+            );
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Erro ao desserializar evolução mensal da simulação ID: " + entity.getId(), e);
+        }
+    }
+
     public SimulacaoResponseDTO executarSimulacao(
             Long perfilId,
             String tipoPolitica,
@@ -126,5 +156,6 @@ public class OrquestradorSimulacaoService {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Erro ao serializar evolução mensal da simulação", e);
         }
+
     }
 }
