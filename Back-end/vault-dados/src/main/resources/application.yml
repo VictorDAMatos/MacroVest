@@ -1,5 +1,11 @@
 server:
   port: 8081
+
 spring:
   application:
     name: vault-dados
+
+vault:
+  caos:
+    delay-ms: 0          # Atraso artificial padrão em milissegundos (ex: 3000 para forçar timeout)
+    taxa-erro: 0.0       # Probabilidade de falha aleatória entre 0.0 (0%) e 1.0 (100%)

@@ -1,0 +1,10 @@
+{
+  "fonte": "IPCA_PROJETADO_FIXTURE",
+  "taxaMensalMedia": 0.0045,
+  "projecaoMensal": [
+    0.0042, 0.0046, 0.0051, 0.0048,
+    0.0044, 0.0039, 0.0041, 0.0043,
+    0.0047, 0.0050, 0.0052, 0.0049
+  ],
+  "fallbackAplicado": false
+}

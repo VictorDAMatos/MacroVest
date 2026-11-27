@@ -1,9 +1,24 @@
 server:
   port: 8080
+
 spring:
   application:
     name: vault-api
-  # Deixaremos o DataSource desativado temporariamente até a Etapa 6
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  datasource:
+    url: jdbc:mysql://localhost:3306/vault_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# URLs dos serviços internos (usadas a partir da Etapa 7)
+vault:
+  servicos:
+    dados-url: http://localhost:8081
+    simulador-url: http://localhost:8082

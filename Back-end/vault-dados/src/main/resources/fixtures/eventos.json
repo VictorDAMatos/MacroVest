@@ -1,0 +1,22 @@
+[
+  {
+    "mesOcorrencia": 2,
+    "descricao": "Consulta médica e exames laboratoriais",
+    "impactoFinanceiro": 850.00
+  },
+  {
+    "mesOcorrencia": 4,
+    "descricao": "Manutenção corretiva no veículo",
+    "impactoFinanceiro": 2300.00
+  },
+  {
+    "mesOcorrencia": 7,
+    "descricao": "Reparo hidráulico residencial urgente",
+    "impactoFinanceiro": 1450.00
+  },
+  {
+    "mesOcorrencia": 10,
+    "descricao": "Reajuste anual de seguro e taxas",
+    "impactoFinanceiro": 1100.00
+  }
+]
