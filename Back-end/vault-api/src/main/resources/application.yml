@@ -1,0 +1,9 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: vault-api
+  # Deixaremos o DataSource desativado temporariamente até a Etapa 6
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
