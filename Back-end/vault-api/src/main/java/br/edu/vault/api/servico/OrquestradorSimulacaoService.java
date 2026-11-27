@@ -1,5 +1,6 @@
 package br.edu.vault.api.servico;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import br.edu.vault.api.clientes.ClienteSimulador;
 import br.edu.vault.api.clientes.FonteEventosHttp;
 import br.edu.vault.api.clientes.FonteInflacaoHttp;
@@ -68,6 +69,7 @@ public class OrquestradorSimulacaoService {
             String tipoPolitica,
             boolean incluirEventos,
             String idempotencyKey
+
     ) {
         long inicioTotalNs = System.nanoTime();
 
@@ -112,24 +114,31 @@ public class OrquestradorSimulacaoService {
 
         long tempoTotalMs = (System.nanoTime() - inicioTotalNs) / 1_000_000L;
 
-        // 4. Persiste a simulação no MySQL
-        SimulacaoEntity simulacaoSalva = salvarSimulacao(
-                perfilEntity,
-                respostaMotor,
-                idempotencyKey,
-                tempoTotalMs
-        );
+        // 4. Persiste a simulação no MySQL com proteção contra corrida simultânea na chave
+        try {
+            SimulacaoEntity simulacaoSalva = salvarSimulacao(
+                    perfilEntity,
+                    respostaMotor,
+                    (idempotencyKey != null && !idempotencyKey.isBlank()) ? idempotencyKey.trim() : null,
+                    tempoTotalMs
+            );
 
-        return new SimulacaoResponseDTO(
-                simulacaoSalva.getId(),
-                perfilEntity.getId(),
-                respostaMotor.politicaAplicada(),
-                respostaMotor.mesesSobrevivencia(),
-                respostaMotor.diasAdicionais(),
-                respostaMotor.houveTimeoutDados(),
-                tempoTotalMs,
-                respostaMotor.evolucaoMensal()
-        );
+            return new SimulacaoResponseDTO(
+                    simulacaoSalva.getId(),
+                    perfilEntity.getId(),
+                    respostaMotor.politicaAplicada(),
+                    respostaMotor.mesesSobrevivencia(),
+                    respostaMotor.diasAdicionais(),
+                    respostaMotor.houveTimeoutDados(),
+                    tempoTotalMs,
+                    respostaMotor.evolucaoMensal()
+            );
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("[IDEMPOTENCIA] Concorrência simultânea detectada para chave '{}'. Recuperando registro vencedor.", idempotencyKey);
+            return simulacaoRepository.findByIdempotencyKey(idempotencyKey.trim())
+                    .map(this::converterParaDTO)
+                    .orElseThrow(() -> ex);
+        }
     }
 
     private SimulacaoEntity salvarSimulacao(
